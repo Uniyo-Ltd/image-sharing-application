@@ -21,7 +21,7 @@ class ImgurGalleryItem extends Equatable {
   
   String get coverImageUrl {
     if (cover != null) {
-      return 'https://i.imgur.com/$cover.jpg';
+      return 'https://i.imgur.com/${cover}.jpg';
     } else if (images != null && images!.isNotEmpty) {
       return images!.first.link;
     } else if (link.isNotEmpty) {

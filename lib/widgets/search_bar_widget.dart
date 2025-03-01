@@ -28,14 +28,12 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    // Load recent searches when the widget is created
     try {
       context.read<RecentSearchesBloc>().add(const LoadRecentSearches());
     } catch (e) {
       debugPrint('Error loading recent searches: $e');
     }
     
-    // Listen for focus changes
     _focusNode.addListener(_onFocusChanged);
     _textController.addListener(_onTextChanged);
   }
@@ -198,9 +196,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
           _buildRecentSearchesHeader(),
           const Divider(height: 1, thickness: 0.5),
           Flexible(
-            child: ListView.builder(
+            child: ListView.separated(
               shrinkWrap: true,
               itemCount: searches.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final term = searches[index];
                 return Dismissible(
@@ -253,32 +252,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
           Text(
             'Recent Searches',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          TextButton.icon(
-            icon: Icon(
-              Icons.delete_sweep_rounded,
-              size: 16,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            label: Text(
+          GestureDetector(
+            onTap: _clearAllSearches,
+            child: Text(
               'Clear All',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            onPressed: _clearAllSearches,
           ),
         ],
       ),
@@ -289,23 +273,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(16.0),
       color: Theme.of(context).colorScheme.surface,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.search_off_rounded,
-            size: 36,
-            color: Theme.of(context).disabledColor.withOpacity(0.5),
+      child: Center(
+        child: Text(
+          'No recent searches',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.grey,
           ),
-          const SizedBox(height: 12),
-          Text(
-            'No Recent Searches',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).disabledColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -314,23 +288,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(16.0),
       color: Theme.of(context).colorScheme.surface,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 36,
+      child: Center(
+        child: Text(
+          'Error loading recent searches',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Could not load recent searches',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.error,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -338,44 +302,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> with SingleTickerProv
   void _handleSearch(String query) {
     if (query.isEmpty) return;
     
-    // Hide the overlay and unfocus
     _hideOverlay();
-    _focusNode.unfocus();
-    
-    setState(() {
-      _textController.text = query;
-      _isSearching = false;
-    });
-    
-    // Perform the search
+    _textController.text = query;
     widget.onSearch(query);
-    
-    // Add to recent searches
-    _addToRecentSearches(query);
-  }
-  
-  void _addToRecentSearches(String query) {
-    try {
-      context.read<RecentSearchesBloc>().add(AddRecentSearch(searchTerm: query));
-    } catch (e) {
-      debugPrint('Error adding recent search: $e');
-    }
-  }
-  
-  void _clearAllSearches() {
-    try {
-      context.read<RecentSearchesBloc>().add(const ClearRecentSearches());
-      _updateOverlay();
-    } catch (e) {
-      debugPrint('Error clearing all searches: $e');
-    }
+    FocusScope.of(context).unfocus();
   }
   
   void _removeSearchTerm(String term) {
-    try {
-      context.read<RecentSearchesBloc>().add(RemoveRecentSearch(searchTerm: term));
-    } catch (e) {
-      debugPrint('Error removing search term: $e');
-    }
+    context.read<RecentSearchesBloc>().add(RemoveRecentSearch(searchTerm: term));
+  }
+  
+  void _clearAllSearches() {
+    context.read<RecentSearchesBloc>().add(const ClearRecentSearches());
   }
 } 

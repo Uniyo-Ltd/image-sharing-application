@@ -81,7 +81,7 @@ class ImageDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
+          
           if (galleryItem.title != null)
             Text(
               galleryItem.title!,
@@ -93,12 +93,12 @@ class ImageDetailScreen extends StatelessWidget {
             
           const SizedBox(height: 16),
           
-          // Stats (views, points, etc.)
+          
           _buildStatsRow(),
           
           const SizedBox(height: 16),
           
-          // Description
+          
           if (galleryItem.description != null && galleryItem.description!.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +116,7 @@ class ImageDetailScreen extends StatelessWidget {
               ],
             ),
           
-          // Date posted
+          
           if (galleryItem.datetime != null)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +136,7 @@ class ImageDetailScreen extends StatelessWidget {
               ],
             ),
           
-          // Album images
+          
           if (galleryItem.isAlbum == true && 
               galleryItem.images != null && 
               galleryItem.images!.isNotEmpty)
@@ -167,21 +167,21 @@ class ImageDetailScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        // Views
+        
         _buildStatItem(
           icon: Icons.visibility,
           value: galleryItem.views?.toString() ?? '0',
           label: 'Views',
         ),
         
-        // Points
+        
         _buildStatItem(
           icon: Icons.thumb_up,
           value: galleryItem.points?.toString() ?? '0',
           label: 'Points',
         ),
         
-        // Comments
+        
         _buildStatItem(
           icon: Icons.comment,
           value: galleryItem.commentCount?.toString() ?? '0',

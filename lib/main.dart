@@ -16,7 +16,7 @@ import 'screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize dependencies
+  
   final sharedPreferences = await SharedPreferences.getInstance();
   final httpClient = http.Client();
   final imgurApiClient = ImgurApiClient(httpClient: httpClient);

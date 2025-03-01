@@ -63,7 +63,7 @@ class GalleryGridItem extends StatelessWidget {
       );
     }
     
-    // Check if it's a video
+    
     final isVideo = _isVideoUrl(imageUrl);
     
     return Stack(
@@ -85,7 +85,7 @@ class GalleryGridItem extends StatelessWidget {
           ),
         ),
         
-        // Video indicator
+        
         if (isVideo)
           Positioned.fill(
             child: Center(
@@ -111,7 +111,7 @@ class GalleryGridItem extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Views count
+        
         Row(
           children: [
             const Icon(Icons.visibility, size: 16),
@@ -123,7 +123,7 @@ class GalleryGridItem extends StatelessWidget {
           ],
         ),
         
-        // Points/Score
+        
         if (galleryItem.score != null)
           Row(
             children: [
@@ -136,7 +136,7 @@ class GalleryGridItem extends StatelessWidget {
             ],
           ),
           
-        // Album indicator
+        
         if (galleryItem.isAlbum == true && galleryItem.imagesCount != null)
           Row(
             children: [
@@ -159,7 +159,7 @@ class GalleryGridItem extends StatelessWidget {
       return galleryItem.coverWidth! / galleryItem.coverHeight!;
     }
     
-    // Default aspect ratio if dimensions are missing
+    
     return 16 / 9;
   }
   
@@ -178,15 +178,15 @@ class GalleryGridItem extends StatelessWidget {
   String _getImageUrl() {
     String url = galleryItem.coverImageUrl;
     
-    // If it's a video, get a thumbnail instead
+    
     if (_isVideoUrl(url)) {
-      // Extract the ID from the URL
+      
       final RegExp regExp = RegExp(r'imgur\.com/([a-zA-Z0-9]+)\.');
       final match = regExp.firstMatch(url);
       
       if (match != null && match.groupCount >= 1) {
         final id = match.group(1);
-        return 'https://i.imgur.com/${id}h.jpg'; // 'h' suffix for medium thumbnail
+        return 'https://i.imgur.com/${id}.jpg';
       }
     }
     

@@ -81,7 +81,7 @@ class FavoritesScreen extends StatelessWidget {
               itemCount: favorites.length,
               itemBuilder: (context, index) {
                 final ImgurImage image = favorites[index];
-                // Convert ImgurImage to ImgurGalleryItem for display
+                
                 final galleryItem = _convertToGalleryItem(image);
                 
                 return Stack(
@@ -142,7 +142,7 @@ class FavoritesScreen extends StatelessWidget {
           size: 22,
         ),
         onPressed: () {
-          // Show confirmation dialog
+          
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -156,7 +156,7 @@ class FavoritesScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    // Remove from favorites
+                    
                     context.read<FavoritesBloc>().add(RemoveFromFavorites(image.id));
                   },
                   child: const Text('Remove'),
@@ -178,7 +178,7 @@ class FavoritesScreen extends StatelessWidget {
     );
   }
   
-  // Helper method to convert ImgurImage to ImgurGalleryItem for display
+  
   ImgurGalleryItem _convertToGalleryItem(ImgurImage image) {
     return ImgurGalleryItem(
       id: image.id,

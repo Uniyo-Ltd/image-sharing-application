@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
-    // Load more when user scrolls to 80% of the list
+    
     return currentScroll >= (maxScroll * 0.8);
   }
   

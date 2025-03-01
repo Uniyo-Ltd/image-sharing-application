@@ -8,10 +8,10 @@ abstract class FavoritesEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-// Event to load the user's favorite images
+
 class LoadFavorites extends FavoritesEvent {}
 
-// Event to add an image to favorites
+
 class AddToFavorites extends FavoritesEvent {
   final ImgurImage image;
   
@@ -21,7 +21,7 @@ class AddToFavorites extends FavoritesEvent {
   List<Object?> get props => [image];
 }
 
-// Event to remove an image from favorites
+
 class RemoveFromFavorites extends FavoritesEvent {
   final String imageId;
   

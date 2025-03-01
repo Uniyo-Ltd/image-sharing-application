@@ -44,7 +44,7 @@ class RecentSearchesBloc extends Bloc<RecentSearchesEvent, RecentSearchesState> 
     try {
       await repository.addRecentSearch(event.searchTerm);
       
-      // No need to reload in a separate call - just load directly
+      
       final searches = repository.getRecentSearches();
       emit(state.copyWith(
         status: RecentSearchesStatus.loaded,
@@ -53,8 +53,8 @@ class RecentSearchesBloc extends Bloc<RecentSearchesEvent, RecentSearchesState> 
       ));
     } catch (e) {
       debugPrint('Error adding recent search: $e');
-      // Don't change the state to error if adding fails
-      // Just log the error and continue
+      
+      
     }
   }
   
@@ -65,7 +65,7 @@ class RecentSearchesBloc extends Bloc<RecentSearchesEvent, RecentSearchesState> 
     try {
       await repository.removeRecentSearch(event.searchTerm);
       
-      // Load directly instead of making a separate call
+      
       final searches = repository.getRecentSearches();
       emit(state.copyWith(
         status: RecentSearchesStatus.loaded,
@@ -74,8 +74,8 @@ class RecentSearchesBloc extends Bloc<RecentSearchesEvent, RecentSearchesState> 
       ));
     } catch (e) {
       debugPrint('Error removing recent search: $e');
-      // Don't change the state to error if removal fails
-      // Just log the error and continue
+      
+      
     }
   }
   
@@ -93,7 +93,7 @@ class RecentSearchesBloc extends Bloc<RecentSearchesEvent, RecentSearchesState> 
       ));
     } catch (e) {
       debugPrint('Error clearing recent searches: $e');
-      // Still try to update the UI even if clearing fails
+      
       emit(state.copyWith(
         status: RecentSearchesStatus.loaded,
         searches: const [],

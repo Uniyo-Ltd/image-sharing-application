@@ -99,7 +99,6 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         error: null,
       ));
       
-      // Save search term to recent searches
       repository.addRecentSearch(event.query);
     } catch (e) {
       emit(state.copyWith(

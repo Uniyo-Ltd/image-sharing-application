@@ -183,6 +183,15 @@ class MockImgurRepository extends _i1.Mock implements _i6.ImgurRepository {
           as _i7.Future<void>);
 
   @override
+  _i7.Future<void> removeRecentSearch(String? searchTerm) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeRecentSearch, [searchTerm]),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
   List<String> getRecentSearches() =>
       (super.noSuchMethod(
             Invocation.method(#getRecentSearches, []),

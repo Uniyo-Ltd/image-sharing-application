@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_sharing_application/api/imgur_api_client.dart';
 import 'package:image_sharing_application/models/imgur_image.dart';
@@ -7,9 +8,8 @@ import 'package:image_sharing_application/repositories/imgur_repository.dart';
 import 'package:image_sharing_application/utils/constants.dart';
 import 'dart:convert';
 
-// Simple mock classes
-class MockSharedPreferences extends Mock implements SharedPreferences {}
-class MockImgurApiClient extends Mock implements ImgurApiClient {}
+@GenerateMocks([SharedPreferences, ImgurApiClient])
+import 'simple_repository_test.mocks.dart';
 
 void main() {
   late MockImgurApiClient mockApiClient;
@@ -35,12 +35,12 @@ void main() {
   
   group('ImgurRepository - Favorites Storage', () {
     test('addToFavorites uses SharedPreferences to store favorites', () async {
-      // Arrange
+      // Setup
       when(mockSharedPreferences.getString(AppConstants.favoriteImagesKey))
           .thenReturn(null);
       when(mockSharedPreferences.setString(
-        argThat(equals(AppConstants.favoriteImagesKey)), 
-        argThat(isA<String>())
+        AppConstants.favoriteImagesKey, 
+        any,
       )).thenAnswer((_) async => true);
       
       // Act
@@ -49,13 +49,13 @@ void main() {
       // Assert
       verify(mockSharedPreferences.getString(AppConstants.favoriteImagesKey)).called(1);
       verify(mockSharedPreferences.setString(
-        argThat(equals(AppConstants.favoriteImagesKey)), 
-        argThat(isA<String>())
+        AppConstants.favoriteImagesKey, 
+        any,
       )).called(1);
     });
     
     test('getFavoriteImages retrieves from SharedPreferences', () {
-      // Arrange
+      // Setup
       final jsonImage = {
         'id': 'test123',
         'title': 'Test Image',
@@ -81,12 +81,12 @@ void main() {
   
   group('ImgurRepository - Recent Searches Storage', () {
     test('addRecentSearch stores search term in SharedPreferences', () async {
-      // Arrange
+      // Setup
       when(mockSharedPreferences.getStringList(AppConstants.recentSearchesKey))
           .thenReturn(['cats']);
       when(mockSharedPreferences.setStringList(
-        argThat(equals(AppConstants.recentSearchesKey)), 
-        argThat(isA<List<String>>())
+        AppConstants.recentSearchesKey, 
+        any,
       )).thenAnswer((_) async => true);
       
       // Act
@@ -95,13 +95,13 @@ void main() {
       // Assert
       verify(mockSharedPreferences.getStringList(AppConstants.recentSearchesKey)).called(1);
       verify(mockSharedPreferences.setStringList(
-        argThat(equals(AppConstants.recentSearchesKey)), 
-        argThat(isA<List<String>>())
+        AppConstants.recentSearchesKey, 
+        any,
       )).called(1);
     });
     
     test('getRecentSearches retrieves from SharedPreferences', () {
-      // Arrange
+      // Setup
       when(mockSharedPreferences.getStringList(AppConstants.recentSearchesKey))
           .thenReturn(['cats', 'dogs', 'birds']);
       
@@ -117,7 +117,7 @@ void main() {
     });
     
     test('clearRecentSearches uses SharedPreferences to clear searches', () async {
-      // Arrange
+      // Setup
       when(mockSharedPreferences.remove(AppConstants.recentSearchesKey))
           .thenAnswer((_) async => true);
       

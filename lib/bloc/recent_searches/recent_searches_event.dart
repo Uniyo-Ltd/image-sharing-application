@@ -7,12 +7,12 @@ abstract class RecentSearchesEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// Event to load recent searches
+
 class LoadRecentSearches extends RecentSearchesEvent {
   const LoadRecentSearches();
 }
 
-// Event to add a search term to recent searches
+
 class AddRecentSearch extends RecentSearchesEvent {
   final String searchTerm;
   
@@ -22,7 +22,7 @@ class AddRecentSearch extends RecentSearchesEvent {
   List<Object> get props => [searchTerm];
 }
 
-// Event to remove a specific search term
+
 class RemoveRecentSearch extends RecentSearchesEvent {
   final String searchTerm;
   
@@ -32,7 +32,7 @@ class RemoveRecentSearch extends RecentSearchesEvent {
   List<Object> get props => [searchTerm];
 }
 
-// Event to clear all recent searches
+
 class ClearRecentSearches extends RecentSearchesEvent {
   const ClearRecentSearches();
 } 

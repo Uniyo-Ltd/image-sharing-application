@@ -1,101 +1,127 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:image_sharing_application/api/imgur_api_client.dart';
 import 'package:image_sharing_application/utils/constants.dart';
 
-/*
- * This file contains unit tests for the ImgurApiClient class.
- * 
- * Due to environment issues, we're providing a simple test that verifies
- * the client can be instantiated, along with a detailed implementation of
- * what the tests would look like in a fully functional environment.
- * 
- * NOTE: The tests below are for reference only and may not run due to
- * environment configuration issues. The actual test being run is the
- * 'can be instantiated' test at the bottom of the file.
- */
-
-// Custom mock HTTP client for testing
-class MockHttpClient extends http.Client {
-  Map<Uri, http.Response> _responses = {};
-  
-  void mockGet(Uri url, http.Response response) {
-    _responses[url] = response;
-  }
-  
-  @override
-  Future<http.Response> get(Uri url, {Map<String, String>? headers}) async {
-    // Match by path if exact URL not found
-    for (var entry in _responses.entries) {
-      if (entry.key.path == url.path) {
-        return entry.value;
-      }
-    }
-    
-    // Return 404 if no match found
-    return http.Response('Not found', 404);
-  }
-}
+@GenerateMocks([http.Client])
+import 'imgur_api_client_test.mocks.dart';
 
 void main() {
   group('ImgurApiClient', () {
-    // This is the only test that will actually run
+    
     test('can be instantiated', () {
       expect(ImgurApiClient(), isNotNull);
     });
     
-    /* 
-     * The following tests are for reference only and demonstrate how
-     * we would test the ImgurApiClient in a fully functional environment.
-     */
-    
-    // Reference implementation for testing getGalleryImages
-    group('getGalleryImages (reference implementation)', () {
-      late MockHttpClient mockClient;
+    group('getGalleryImages', () {
+      late MockClient mockClient;
       late ImgurApiClient apiClient;
       
       setUp(() {
-        mockClient = MockHttpClient();
+        mockClient = MockClient();
         apiClient = ImgurApiClient(httpClient: mockClient);
       });
       
       test('returns gallery images when the call is successful', () async {
         // Arrange
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/hot/viral/0');
-        
-        final mockResponseData = {
+        final galleryResponse = {
           'data': [
             {
               'id': 'abc123',
-              'title': 'Test Image',
-              'link': 'https://imgur.com/abc123.jpg',
+              'title': 'Test Gallery Item',
+              'description': 'Test description',
+              'datetime': 1612345678,
+              'cover': 'def456',
+              'cover_width': 800,
+              'cover_height': 600,
+              'account_url': 'testuser',
+              'account_id': 12345,
+              'views': 1000,
+              'ups': 50,
+              'downs': 5,
+              'points': 45,
+              'score': 45,
+              'comment_count': 10,
+              'is_album': true,
+              'images': [
+                {
+                  'id': 'def456',
+                  'title': 'Test Image',
+                  'description': 'Test image description',
+                  'datetime': 1612345678,
+                  'type': 'image/jpeg',
+                  'animated': false,
+                  'width': 800,
+                  'height': 600,
+                  'size': 123456,
+                  'views': 1000,
+                  'bandwidth': 123456000,
+                  'vote': null,
+                  'section': null,
+                  'account_url': 'testuser',
+                  'account_id': 12345,
+                  'is_ad': false,
+                  'in_most_viral': false,
+                  'has_sound': false,
+                  'tags': [],
+                  'ad_type': 0,
+                  'ad_url': '',
+                  'edited': 0,
+                  'in_gallery': true,
+                  'link': 'https://i.imgur.com/def456.jpg',
+                  'mp4': null,
+                  'gifv': null,
+                  'mp4_size': null,
+                  'looping': false,
+                  'processing': null,
+                  'comment_count': null,
+                  'favorite_count': null,
+                  'ups': null,
+                  'downs': null,
+                  'points': null,
+                  'score': null,
+                }
+              ],
+              'images_count': 1,
+              'link': 'https://imgur.com/a/abc123',
             }
           ],
           'success': true,
           'status': 200,
         };
         
-        mockClient.mockGet(
-          expectedUrl,
-          http.Response(json.encode(mockResponseData), 200)
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/hot/viral/day/0');
+        
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
+          http.Response(jsonEncode(galleryResponse), 200)
         );
         
         // Act
         final result = await apiClient.getGalleryImages();
         
         // Assert
-        expect(result['success'], true);
+        expect(result, isA<Map<String, dynamic>>());
+        expect(result['success'], isTrue);
+        expect(result['data'], isA<List>());
+        expect(result['data'].length, 1);
         expect(result['data'][0]['id'], 'abc123');
-        expect(result['data'][0]['title'], 'Test Image');
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
       
       test('throws an exception when the call fails', () async {
         // Arrange
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/hot/viral/0');
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/hot/viral/day/0');
         
-        mockClient.mockGet(
-          expectedUrl,
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
           http.Response('Not found', 404)
         );
         
@@ -104,113 +130,174 @@ void main() {
           () => apiClient.getGalleryImages(),
           throwsA(isA<Exception>()),
         );
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
     });
     
-    // Reference implementation for testing searchImages
-    group('searchImages (reference implementation)', () {
-      late MockHttpClient mockClient;
+    group('searchImages', () {
+      late MockClient mockClient;
       late ImgurApiClient apiClient;
       
       setUp(() {
-        mockClient = MockHttpClient();
+        mockClient = MockClient();
         apiClient = ImgurApiClient(httpClient: mockClient);
       });
       
       test('returns search results when the call is successful', () async {
         // Arrange
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/search/viral/0');
-        
-        final mockResponseData = {
+        final searchQuery = 'cats';
+        final searchResponse = {
           'data': [
             {
               'id': 'xyz789',
               'title': 'Search Result',
-              'link': 'https://imgur.com/xyz789.jpg',
+              'description': 'A cat image',
+              'datetime': 1612345678,
+              'cover': 'ghi789',
+              'cover_width': 800,
+              'cover_height': 600,
+              'account_url': 'testuser',
+              'account_id': 12345,
+              'views': 1000,
+              'ups': 50,
+              'downs': 5,
+              'points': 45,
+              'score': 45,
+              'comment_count': 10,
+              'is_album': true,
+              'images': [
+                {
+                  'id': 'ghi789',
+                  'title': 'Cat Image',
+                  'description': 'A cute cat',
+                  'link': 'https://i.imgur.com/ghi789.jpg',
+                }
+              ],
+              'images_count': 1,
+              'link': 'https://imgur.com/a/xyz789',
             }
           ],
           'success': true,
           'status': 200,
         };
         
-        mockClient.mockGet(
-          expectedUrl,
-          http.Response(json.encode(mockResponseData), 200)
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/search/viral/all/0?q=$searchQuery');
+        
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
+          http.Response(jsonEncode(searchResponse), 200)
         );
         
         // Act
-        final result = await apiClient.searchImages(query: 'test');
+        final result = await apiClient.searchImages(query: searchQuery);
         
         // Assert
-        expect(result['success'], true);
+        expect(result, isA<Map<String, dynamic>>());
+        expect(result['success'], isTrue);
+        expect(result['data'], isA<List>());
+        expect(result['data'].length, 1);
         expect(result['data'][0]['id'], 'xyz789');
         expect(result['data'][0]['title'], 'Search Result');
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
       
       test('throws an exception when the call fails', () async {
         // Arrange
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/search/viral/0');
+        final searchQuery = 'invalid';
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/gallery/search/viral/all/0?q=$searchQuery');
         
-        mockClient.mockGet(
-          expectedUrl,
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
           http.Response('Not found', 404)
         );
         
         // Act & Assert
         expect(
-          () => apiClient.searchImages(query: 'test'),
+          () => apiClient.searchImages(query: searchQuery),
           throwsA(isA<Exception>()),
         );
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
     });
     
-    // Reference implementation for testing getImageDetails
-    group('getImageDetails (reference implementation)', () {
-      late MockHttpClient mockClient;
+    group('getImageDetails', () {
+      late MockClient mockClient;
       late ImgurApiClient apiClient;
       
       setUp(() {
-        mockClient = MockHttpClient();
+        mockClient = MockClient();
         apiClient = ImgurApiClient(httpClient: mockClient);
       });
       
       test('returns image details when the call is successful', () async {
         // Arrange
-        final imageId = 'abc123';
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/image/$imageId');
-        
-        final mockResponseData = {
+        final imageId = 'def456';
+        final imageResponse = {
           'data': {
             'id': imageId,
             'title': 'Test Image',
             'description': 'A test image',
-            'link': 'https://imgur.com/$imageId.jpg',
+            'datetime': 1612345678,
+            'type': 'image/jpeg',
+            'animated': false,
+            'width': 800,
+            'height': 600,
+            'size': 123456,
+            'views': 1000,
+            'bandwidth': 123456000,
+            'vote': null,
+            'section': null,
+            'account_url': 'testuser',
+            'account_id': 12345,
+            'is_ad': false,
+            'in_most_viral': false,
+            'has_sound': false,
+            'tags': [],
+            'ad_type': 0,
+            'ad_url': '',
+            'edited': 0,
+            'in_gallery': true,
+            'link': 'https://i.imgur.com/def456.jpg',
           },
           'success': true,
           'status': 200,
         };
         
-        mockClient.mockGet(
-          expectedUrl,
-          http.Response(json.encode(mockResponseData), 200)
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/image/$imageId');
+        
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
+          http.Response(jsonEncode(imageResponse), 200)
         );
         
         // Act
         final result = await apiClient.getImageDetails(imageId);
         
         // Assert
-        expect(result['success'], true);
+        expect(result, isA<Map<String, dynamic>>());
+        expect(result['success'], isTrue);
+        expect(result['data'], isA<Map<String, dynamic>>());
         expect(result['data']['id'], imageId);
         expect(result['data']['title'], 'Test Image');
+        expect(result['data']['link'], 'https://i.imgur.com/def456.jpg');
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
       
       test('throws an exception when the call fails', () async {
         // Arrange
         final imageId = 'invalid';
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/image/$imageId');
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/image/$imageId');
         
-        mockClient.mockGet(
-          expectedUrl,
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
           http.Response('Not found', 404)
         );
         
@@ -219,66 +306,94 @@ void main() {
           () => apiClient.getImageDetails(imageId),
           throwsA(isA<Exception>()),
         );
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
     });
     
-    // Reference implementation for testing getAlbumDetails
-    group('getAlbumDetails (reference implementation)', () {
-      late MockHttpClient mockClient;
+    group('getAlbumDetails', () {
+      late MockClient mockClient;
       late ImgurApiClient apiClient;
       
       setUp(() {
-        mockClient = MockHttpClient();
+        mockClient = MockClient();
         apiClient = ImgurApiClient(httpClient: mockClient);
       });
       
       test('returns album details when the call is successful', () async {
         // Arrange
-        final albumId = 'xyz789';
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/album/$albumId');
-        
-        final mockResponseData = {
+        final albumId = 'abc123';
+        final albumResponse = {
           'data': {
             'id': albumId,
             'title': 'Test Album',
             'description': 'A test album',
+            'datetime': 1612345678,
+            'cover': 'def456',
+            'cover_width': 800,
+            'cover_height': 600,
+            'account_url': 'testuser',
+            'account_id': 12345,
+            'views': 1000,
+            'ups': 50,
+            'downs': 5,
+            'points': 45,
+            'score': 45,
+            'comment_count': 10,
             'images': [
               {
-                'id': 'img1',
-                'link': 'https://imgur.com/img1.jpg',
+                'id': 'def456',
+                'title': 'First Image',
+                'description': 'First image in album',
+                'link': 'https://i.imgur.com/def456.jpg',
               },
               {
-                'id': 'img2',
-                'link': 'https://imgur.com/img2.jpg',
+                'id': 'ghi789',
+                'title': 'Second Image',
+                'description': 'Second image in album',
+                'link': 'https://i.imgur.com/ghi789.jpg',
               }
             ],
+            'images_count': 2,
+            'link': 'https://imgur.com/a/abc123',
           },
           'success': true,
           'status': 200,
         };
         
-        mockClient.mockGet(
-          expectedUrl,
-          http.Response(json.encode(mockResponseData), 200)
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/album/$albumId');
+        
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
+          http.Response(jsonEncode(albumResponse), 200)
         );
         
         // Act
         final result = await apiClient.getAlbumDetails(albumId);
         
         // Assert
-        expect(result['success'], true);
+        expect(result, isA<Map<String, dynamic>>());
+        expect(result['success'], isTrue);
+        expect(result['data'], isA<Map<String, dynamic>>());
         expect(result['data']['id'], albumId);
         expect(result['data']['title'], 'Test Album');
+        expect(result['data']['images'], isA<List>());
         expect(result['data']['images'].length, 2);
+        expect(result['data']['images'][0]['id'], 'def456');
+        expect(result['data']['images'][1]['id'], 'ghi789');
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
       
       test('throws an exception when the call fails', () async {
         // Arrange
         final albumId = 'invalid';
-        final expectedUrl = Uri.parse('${AppConstants.imgurApiBaseUrl}/album/$albumId');
+        final url = Uri.parse('${AppConstants.imgurApiBaseUrl}/album/$albumId');
         
-        mockClient.mockGet(
-          expectedUrl,
+        when(mockClient.get(
+          url,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => 
           http.Response('Not found', 404)
         );
         
@@ -287,6 +402,7 @@ void main() {
           () => apiClient.getAlbumDetails(albumId),
           throwsA(isA<Exception>()),
         );
+        verify(mockClient.get(url, headers: anyNamed('headers'))).called(1);
       });
     });
   });

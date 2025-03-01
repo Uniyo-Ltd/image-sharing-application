@@ -15,7 +15,6 @@ class ImgurRepository {
     required this.sharedPreferences,
   });
   
-  // Get popular gallery images
   Future<List<ImgurGalleryItem>> getGalleryImages({
     String section = 'hot',
     String sort = 'viral',
@@ -33,7 +32,7 @@ class ImgurRepository {
       if (response['success'] == true && response['data'] is List) {
         return (response['data'] as List)
             .map((item) => ImgurGalleryItem.fromJson(item))
-            .where((item) => !item.isNsfw) // Filter out NSFW content
+            .where((item) => !item.isNsfw) 
             .toList();
       }
       
@@ -43,7 +42,6 @@ class ImgurRepository {
     }
   }
   
-  // Search for gallery images
   Future<List<ImgurGalleryItem>> searchGalleryImages({
     required String query,
     String sort = 'viral',
@@ -61,7 +59,7 @@ class ImgurRepository {
       if (response['success'] == true && response['data'] is List) {
         return (response['data'] as List)
             .map((item) => ImgurGalleryItem.fromJson(item))
-            .where((item) => !item.isNsfw) // Filter out NSFW content
+            .where((item) => !item.isNsfw) 
             .toList();
       }
       
@@ -71,7 +69,6 @@ class ImgurRepository {
     }
   }
   
-  // Get image details by ID
   Future<ImgurImage> getImageDetails(String imageId) async {
     try {
       final response = await apiClient.getImageDetails(imageId);
@@ -86,7 +83,6 @@ class ImgurRepository {
     }
   }
   
-  // Get album details by ID
   Future<ImgurGalleryItem> getAlbumDetails(String albumId) async {
     try {
       final response = await apiClient.getAlbumDetails(albumId);
@@ -101,21 +97,16 @@ class ImgurRepository {
     }
   }
   
-  // Add an image to favorites
   Future<void> addToFavorites(ImgurImage image) async {
     try {
-      // Get current favorites
       final favorites = getFavoriteImages();
       
-      // Check if already in favorites
       if (favorites.any((item) => item.id == image.id)) {
         return;
       }
       
-      // Add to favorites
       favorites.add(image);
       
-      // Save to shared preferences
       await sharedPreferences.setString(
         AppConstants.favoriteImagesKey,
         jsonEncode(favorites.map((img) => img.toJson()).toList()),
@@ -125,16 +116,11 @@ class ImgurRepository {
     }
   }
   
-  // Remove an image from favorites
   Future<void> removeFromFavorites(String imageId) async {
     try {
-      // Get current favorites
       final favorites = getFavoriteImages();
-      
-      // Remove from favorites
       final updatedFavorites = favorites.where((img) => img.id != imageId).toList();
       
-      // Save to shared preferences
       await sharedPreferences.setString(
         AppConstants.favoriteImagesKey,
         jsonEncode(updatedFavorites.map((img) => img.toJson()).toList()),
@@ -144,7 +130,6 @@ class ImgurRepository {
     }
   }
   
-  // Get all favorite images
   List<ImgurImage> getFavoriteImages() {
     try {
       final favoritesJson = sharedPreferences.getString(AppConstants.favoriteImagesKey);
@@ -156,73 +141,63 @@ class ImgurRepository {
       final List<dynamic> decodedJson = jsonDecode(favoritesJson);
       return decodedJson.map((item) => ImgurImage.fromJson(item)).toList();
     } catch (e) {
-      // If there's an error, return empty list (don't throw)
+      
       return [];
     }
   }
   
-  // Add a search term to recent searches
   Future<void> addRecentSearch(String searchTerm) async {
     try {
       final recentSearches = getRecentSearches();
       
-      // Remove if already exists (to move it to the top)
+      
       recentSearches.removeWhere((term) => term == searchTerm);
       
-      // Add to the beginning
+      
       recentSearches.insert(0, searchTerm);
       
-      // Keep only the latest 10 searches
+      
       final updatedSearches = recentSearches.take(10).toList();
       
-      // Save to shared preferences
       await sharedPreferences.setStringList(
         AppConstants.recentSearchesKey,
         updatedSearches,
       );
     } catch (e) {
       debugPrint('Failed to add recent search: $e');
-      // Don't throw, just log the error
+      
     }
   }
   
-  // Remove a specific search term from recent searches
   Future<void> removeRecentSearch(String searchTerm) async {
     try {
       final recentSearches = getRecentSearches();
-      
-      // Remove the specific search term
       recentSearches.removeWhere((term) => term == searchTerm);
       
-      // Save to shared preferences
       await sharedPreferences.setStringList(
         AppConstants.recentSearchesKey,
         recentSearches,
       );
     } catch (e) {
       debugPrint('Failed to remove recent search: $e');
-      // Don't throw, just log the error
+      
     }
   }
   
-  // Get all recent searches
   List<String> getRecentSearches() {
     try {
       return sharedPreferences.getStringList(AppConstants.recentSearchesKey) ?? [];
     } catch (e) {
       debugPrint('Error getting recent searches: $e');
-      // If there's an error, return empty list
       return [];
     }
   }
   
-  // Clear all recent searches
   Future<void> clearRecentSearches() async {
     try {
       await sharedPreferences.remove(AppConstants.recentSearchesKey);
     } catch (e) {
       debugPrint('Failed to clear recent searches: $e');
-      // Don't throw, just log the error
     }
   }
-} 
+}

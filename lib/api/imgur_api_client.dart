@@ -8,7 +8,7 @@ class ImgurApiClient {
   ImgurApiClient({http.Client? httpClient}) 
       : _httpClient = httpClient ?? http.Client();
   
-  // Fetch gallery images
+  
   Future<Map<String, dynamic>> getGalleryImages({
     String section = 'hot',
     String sort = 'viral',
@@ -22,7 +22,7 @@ class ImgurApiClient {
     return _getRequest(url);
   }
   
-  // Search for images
+  
   Future<Map<String, dynamic>> searchImages({
     required String query,
     String sort = 'viral',
@@ -36,21 +36,21 @@ class ImgurApiClient {
     return _getRequest(url);
   }
   
-  // Get image details
+  
   Future<Map<String, dynamic>> getImageDetails(String imageId) async {
     final Uri url = Uri.parse('${AppConstants.imgurApiBaseUrl}/image/$imageId');
     
     return _getRequest(url);
   }
   
-  // Get album details
+  
   Future<Map<String, dynamic>> getAlbumDetails(String albumId) async {
     final Uri url = Uri.parse('${AppConstants.imgurApiBaseUrl}/album/$albumId');
     
     return _getRequest(url);
   }
   
-  // Helper method for GET requests
+  
   Future<Map<String, dynamic>> _getRequest(Uri url) async {
     final response = await _httpClient.get(
       url,

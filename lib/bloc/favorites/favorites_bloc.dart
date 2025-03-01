@@ -41,7 +41,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     try {
       await repository.addToFavorites(event.image);
       
-      // Get the updated list of favorites
+      
       final updatedFavorites = repository.getFavoriteImages();
       
       emit(state.copyWith(
@@ -64,7 +64,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     try {
       await repository.removeFromFavorites(event.imageId);
       
-      // Get the updated list of favorites
+      
       final updatedFavorites = repository.getFavoriteImages();
       
       emit(state.copyWith(
